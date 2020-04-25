@@ -2,38 +2,68 @@
 
 {% block content %}
     <div>
-        <h1>Welcome</h1>
+        <h1>Welcome {{user.name}}</h1>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">
+                Your stats
+            </h5>
+            <div class="card-text">
+                Daily recomended calorie intake: {{user.cals}}</br>
+                {% if edible %}
+                    Edible calories: {{edible}}</br>
+                {% else %}
+                    You will die of starving (GG)</br>
+                {% endif %}
+                {% if soon_expire %}
+                    Calories worth of food that will expire in 2 days: {{soon_expire}}</br>
+                    <form action="removeItems" method="POST">{% csrf_token %}
+                        <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden><br>
+                        <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden></br>
+                        <input type="text" class="form-control" id="action" name="action" value="donate" hidden></br>
+                        <input type="submit" value="Donate">
+                    </form>
+                {% endif %}
+                {% if expired %}
+                    Expired food: {{expired}}</br>
+                    <form action="removeItems" method="POST">{% csrf_token %}
+                        <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden><br>
+                        <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden></br>
+                        <input type="text" class="form-control" id="action" name="action" value="throw" hidden></br>
+                        <input type="submit" value="Throw">
+                    </form>
+                {% endif %}
+            </div>
+        </div>
     </div>
     
-    <div class="container">
-        <div class="row">
-            {% if lists %}
-                {% for list in lists %}
-                    <div class="col-sm">
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h1>
-                                    <p class="lead">
-                                        {{ list.name }}
-                                    </p>
-                                </h1>
-                                {% for item in list.item_set.all %}
-                                    <p>
-                                        {{ item.name }} - exp: {{item.exp_date}} - kcal: {{item.cals}}
-                                    </p> 
-                                {% endfor %}
-                            </div>
-                        </div>
+    <div class="container-fluid">
+        {% if lists %}
+            {% for list in lists %}
+                <div class="card mb-3 w-75 p-2">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <p>
+                                {{ list.name }}
+                            </p>
+                        </h5>
+                        {% for item in list.item_set.all %}
+                            <p>
+                                {{ item.name }} - exp: {{item.exp_date}} - kcal: {{item.cals}}
+                            </p> 
+                        {% endfor %}
                     </div>
-                {% endfor %}
-            {% else %}
-                <p>No Lists</p>
-            {% endif %}
-        </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No Lists</p>
+        {% endif %}
         <div class="row">
             <form action="addForm" method="POST">{% csrf_token %}
-                <input type="text" class="form-control" id="name" name="name" value={{user_name}} hidden><br>
-                <input type="text" class="form-control" id="pw" name="pw" value={{user_pw}} hidden>
+                <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden><br>
+                <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden>
                 <input type="submit" value="Add list">
             </form>
         </div>

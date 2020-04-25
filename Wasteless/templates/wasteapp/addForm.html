@@ -10,14 +10,14 @@
         <input type="text" class="form-control" id="pw" name="pw" value={{user_pw}} hidden>
         <input type="submit" value="Add list">
     </form>
-    <button onclick='adauga_camp()' >Add product</button>
+    <button onclick='spawnField()' >Add product</button>
 </div>
 
 <script>
 
     var i = 0;
 
-    function adauga_camp() {
+    function spawnField() {
         var div = document.createElement('div');
         var name = document.createElement('input');
         name.placeholder = 'Item name';
@@ -29,6 +29,7 @@
         cals.placeholder = 0;
         cals.id = 'cals_' + i;
         cals.name = 'cals_' + i;
+        cals.min = 1;
         var date = document.createElement('input');
         date.type = "date";
         date.id = 'date_' + i;
