@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div>
+        <h1>Welcome</h1>
+    </div>
+    
+    <div class="container">
+        <div class="row">
+            {% if lists %}
+                {% for list in lists %}
+                    <div class="col-sm">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h1>
+                                    <p class="lead">
+                                        {{ list.name }}
+                                    </p>
+                                </h1>
+                                {% for item in list.item_set.all %}
+                                    <p>
+                                        {{ item.name }} - exp: {{item.exp_date}} - kcal: {{item.cals}}
+                                    </p> 
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No Lists</p>
+            {% endif %}
+        </div>
+        <div class="row">
+            <form action="addForm" method="POST">{% csrf_token %}
+                <input type="text" class="form-control" id="name" name="name" value={{user_name}} hidden><br>
+                <input type="text" class="form-control" id="pw" name="pw" value={{user_pw}} hidden>
+                <input type="submit" value="Add list">
+            </form>
+        </div>
+    </div>
+    
+{% endblock %}

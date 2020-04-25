@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div>
+        <h1 class="text-center mb-3">Log in</h1>
+    </div>
+    
+    <form action="login" method="POST">{% csrf_token %}
+        <div class="form-group">
+            <label for="name">Name:</label><br>
+            <input type="text" class="form-control" id="name" name="name"><br>
+        </div>
+        <div class="form-group">
+            <label for="pw">Password:</label><br>
+            <input type="text" class="form-control" id="pw" name="pw">
+        </div>
+        <input type="submit" value="Log In">
+    </form>
+    <div>
+        {{context}}
+    </div>
+        
+{% endblock %}

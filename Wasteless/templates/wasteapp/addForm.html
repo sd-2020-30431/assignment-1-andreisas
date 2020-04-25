@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="div">
+    <form action="addNewList" method="POST">{% csrf_token %}
+        <input type="text" class="form-control" placeholder="List name" name="list_name" id="list_name">
+        <div class="div" id='formular'>
+        </div>
+        <input type="text" class="form-control" id="name" name="name" value={{user_name}} hidden><br>
+        <input type="text" class="form-control" id="pw" name="pw" value={{user_pw}} hidden>
+        <input type="submit" value="Add list">
+    </form>
+    <button onclick='adauga_camp()' >Add product</button>
+</div>
+
+<script>
+
+    var i = 0;
+
+    function adauga_camp() {
+        var div = document.createElement('div');
+        var name = document.createElement('input');
+        name.placeholder = 'Item name';
+        name.type = "text";
+        name.id = 'name_' + i;
+        name.name = 'name_' + i;
+        var cals = document.createElement('input');
+        cals.type = "number";
+        cals.placeholder = 0;
+        cals.id = 'cals_' + i;
+        cals.name = 'cals_' + i;
+        var date = document.createElement('input');
+        date.type = "date";
+        date.id = 'date_' + i;
+        date.name = 'date_' + i;
+        div.appendChild(name);
+        div.appendChild(cals);
+        div.appendChild(date);
+        document.getElementById('formular').appendChild(div);
+        i++;
+    }
+    
+    </script>
+
+{% endblock %}
