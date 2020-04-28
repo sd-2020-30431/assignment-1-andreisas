@@ -9,5 +9,7 @@ urlpatterns = [
     path('addForm', views.addForm, name='addForm'),
     path('addNewList', views.addNewList, name='addNewList'),
     path('login', views.login, name='login'),
-    path('removeItems', views.removeItems, name='removeItems')
+    path('register', views.register, name='register'),
+    path('removeItems', views.removeItems, name='removeItems'),
+    path('consumeItem', views.consumeItem, name='consumeItem'),
 ]

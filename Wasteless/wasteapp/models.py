@@ -6,7 +6,7 @@ class User(models.Model):
     cals = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.name + " " + self.password + " " + self.cals
+        return self.name
 
 class GList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,37 +1,74 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <div>
-        <h1>Welcome {{user.name}}</h1>
+        <h1>Wasteapp</h1>
     </div>
+    {% if message %}
+        <div class="alert alert-success" id="success-alert">{{message}}</div>
+        <script>
+            $(".alert").delay(2000).slideUp(200, function() {
+                $(this).alert('close');
+            });
+        </script>
+    {% endif %}
 
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">
-                Your stats
-            </h5>
+            <h4 class="card-title">
+                Your stats:
+            </h4>
             <div class="card-text">
                 Daily recomended calorie intake: {{user.cals}}</br>
                 {% if edible %}
                     Edible calories: {{edible}}</br>
+                    <div id="survival">
+                    </div>
+                    <script>
+                        function getSurvival(edible, cals){
+                            return edible/cals;
+                        }
+
+                        var x = getSurvival(edible, user.cals).toString();
+                        document.getElementById("survival").innerHTML = "With that you can survive for " + x + " days"; 
+                    </script>
+                    <p>Select an item to consume</p>
+                    <form action="consumeItem" method="POST">{% csrf_token %}
+                        <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden>
+                        <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden>
+                        <input list="items_datalits" name="item_name">
+                        <datalist id="items_datalits">
+                            {% if lists %}
+                                {% for list in lists %}
+                                    {% for item in list.item_set.all %}
+                                        <option value = {{item.name}} >
+                                    {% endfor %}
+                                {% endfor %}
+                            {% else %}
+                                <p>No Lists</p>
+                            {% endif %}
+                        </datalist>
+                        <input type="submit" value="Consume">
+                    </form>  
                 {% else %}
                     You will die of starving (GG)</br>
                 {% endif %}
                 {% if soon_expire %}
                     Calories worth of food that will expire in 2 days: {{soon_expire}}</br>
                     <form action="removeItems" method="POST">{% csrf_token %}
-                        <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden><br>
-                        <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden></br>
-                        <input type="text" class="form-control" id="action" name="action" value="donate" hidden></br>
+                        <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden>
+                        <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden>
+                        <input type="text" class="form-control" id="action" name="action" value="donate" hidden>
                         <input type="submit" value="Donate">
                     </form>
                 {% endif %}
                 {% if expired %}
                     Expired food: {{expired}}</br>
                     <form action="removeItems" method="POST">{% csrf_token %}
-                        <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden><br>
-                        <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden></br>
-                        <input type="text" class="form-control" id="action" name="action" value="throw" hidden></br>
+                        <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden>
+                        <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden>
+                        <input type="text" class="form-control" id="action" name="action" value="throw" hidden>
                         <input type="submit" value="Throw">
                     </form>
                 {% endif %}
@@ -44,11 +81,11 @@
             {% for list in lists %}
                 <div class="card mb-3 w-75 p-2">
                     <div class="card-body">
-                        <h5 class="card-title">
+                        <h4 class="card-title">
                             <p>
                                 {{ list.name }}
                             </p>
-                        </h5>
+                        </h4>
                         {% for item in list.item_set.all %}
                             <p>
                                 {{ item.name }} - exp: {{item.exp_date}} - kcal: {{item.cals}}
@@ -60,13 +97,12 @@
         {% else %}
             <p>No Lists</p>
         {% endif %}
-        <div class="row">
+        <div class="row mb-5">
             <form action="addForm" method="POST">{% csrf_token %}
                 <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden><br>
                 <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden>
                 <input type="submit" value="Add list">
             </form>
         </div>
-    </div>
-    
+    </div> 
 {% endblock %}
