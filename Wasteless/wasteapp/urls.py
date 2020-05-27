@@ -12,4 +12,5 @@ urlpatterns = [
     path('register', views.register, name='register'),
     path('removeItems', views.removeItems, name='removeItems'),
     path('consumeItem', views.consumeItem, name='consumeItem'),
+    path('getReport', views.getReport, name='getReport'),
 ]

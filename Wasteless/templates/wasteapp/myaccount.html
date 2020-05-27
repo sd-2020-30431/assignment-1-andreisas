@@ -8,7 +8,7 @@
     {% if message %}
         <div class="alert alert-success" id="success-alert">{{message}}</div>
         <script>
-            $(".alert").delay(2000).slideUp(200, function() {
+            $(".alert").delay(5000).slideUp(200, function() {
                 $(this).alert('close');
             });
         </script>
@@ -72,6 +72,18 @@
                         <input type="submit" value="Throw">
                     </form>
                 {% endif %}
+                <form action="getReport" method="POST">{% csrf_token %}
+                    <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden>
+                    <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden>
+                    <input type="text" class="form-control" id="action" name="action" value="week" hidden>
+                    <input type="submit" value="Get week report">
+                </form>
+                <form action="getReport" method="POST">{% csrf_token %}
+                    <input type="text" class="form-control" id="name" name="name" value={{user.name}} hidden>
+                    <input type="text" class="form-control" id="pw" name="pw" value={{user.password}} hidden>
+                    <input type="text" class="form-control" id="action" name="action" value="month" hidden>
+                    <input type="submit" value="Get month report">
+                </form>
             </div>
         </div>
     </div>

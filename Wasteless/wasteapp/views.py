@@ -5,6 +5,7 @@ from datetime import datetime
 import re
 from .models import User, GList, Item
 from .dbHandler import dbh
+from .factory import factoryReport
 
 def index(request, context=dict()):
     return render(request, 'wasteapp/index.html', context)
@@ -167,5 +168,9 @@ def register(request):
     else:
         dbh.addUser(name, pw1, cals)
         return renderMyAccount(request, new_user, "Welcome " + name + "!")
+
+def getReport(request):
+    user = dbh.getUserByName(request.POST['name'])
+    return renderMyAccount(request, user, factoryReport.getReport(request.POST['action'], user))
 
 
