@@ -6,6 +6,13 @@ import re
 from .models import User, GList, Item
 from .dbHandler import dbh
 from .factory import factoryReport
+from .DAO.ItemHandler import ItemHandler
+from .DAO.UserHandler import UserHandler
+from .DAO.ListHandler import ListHandler
+
+uh = UserHandler()
+lh = ListHandler()
+ih = ItemHandler()
 
 def index(request, context=dict()):
     return render(request, 'wasteapp/index.html', context)
@@ -14,8 +21,8 @@ def login(request):
     name = request.POST['name']
     pw = request.POST['pw']
     context = {'message':""}
-    if dbh.userFound(name):
-        user = dbh.getUserByName(name)
+    if uh.userFound(name):
+        user = uh.getUserByName(name)
     else:
         context['message'] = "Username does not exist!"
         return render(request, "wasteapp/index.html", context)
@@ -36,12 +43,12 @@ def addForm(request):
 
 
 def getStats(user):
-    lists = dbh.getListsOfUser(user)
+    lists = uh.getListsOfUser(user)
     edible_cals = 0
     expired_cals = 0
     soon_expire_cals = 0
     for li in lists:
-        litems = dbh.getItemsOfList(li)
+        litems = lh.getItemsOfList(li)
         for litem in litems:
             availability = (litem.exp_date - timezone.make_aware(datetime.now(), timezone.get_default_timezone())).days
             if availability > 2:
@@ -53,7 +60,7 @@ def getStats(user):
     return edible_cals, soon_expire_cals, expired_cals
 
 def renderMyAccount(request, user, message):
-    lists = dbh.getListsOfUser(user)
+    lists = uh.getListsOfUser(user)
     edible, soon_expire, expired = getStats(user)
     context = {'lists':lists, 'user':user, 'edible':edible, 'soon_expire':soon_expire, 'expired':expired, 'message': message}
     return render(request, "wasteapp/myaccount.html", context)
@@ -63,60 +70,60 @@ def renderIndex(request, message):
     return render(request, "wasteapp/index.html", context)
 
 def removeItems(request):
-    user = dbh.getUserByName(request.POST['name'])
-    lists = dbh.getListsOfUser(user)
+    user = uh.getUserByName(request.POST['name'])
+    lists = uh.getListsOfUser(user)
     if request.POST['action'] == "donate":
         for l in lists:
-            items = dbh.getItemsOfList(l)
+            items = lh.getItemsOfList(l)
             for litem in items:
                 if (litem.exp_date - timezone.make_aware(datetime.now(), timezone.get_default_timezone())).days <= 2 and (litem.exp_date - timezone.make_aware(datetime.now(), timezone.get_default_timezone())).days > 0:
-                    dbh.deleteDBObject(litem)
+                    ih.delete(litem)
             try:
-                dbh.getItemsOfList(l)[0]
+                lh.getItemsOfList(l)[0]
             except IndexError:
-                dbh.deleteDBObject(l)
+                lh.delete(l)
         return renderMyAccount(request, user, "The items were donated")
     else:
         for l in lists:
-            items = dbh.getItemsOfList(l)
+            items = lh.getItemsOfList(l)
             for litem in items:
                 if (litem.exp_date - timezone.make_aware(datetime.now(), timezone.get_default_timezone())).days <= 0:
-                    dbh.deleteDBObject(litem)
+                    ih.delete(litem)
             try:
-                dbh.getItemsOfList(l)[0]
+                lh.getItemsOfList(l)[0]
             except IndexError:
-                dbh.deleteDBObject(l)
+                lh.delete(l)
         return renderMyAccount(request, user, "The expired items were thrown to the garbage")
 
 def addNewList(request):
     user_name = request.POST['name']
     user_pw = request.POST['pw']
     list_name = request.POST['list_name']
-    user = dbh.getUserByName(user_name)
-    if dbh.getSpecificList(user, list_name):
+    user = uh.getUserByName(user_name)
+    if lh.getSpecificList(user, list_name):
         return renderMyAccount(request, user, "A list with the same name already exists")
         
-    dbh.addList(user, list_name)
-    new_list = dbh.getListByName(user, list_name)
+    lh.addList(user, list_name)
+    new_list = lh.getListByName(user, list_name)
     i = 0
     
     while ('name_' + str(i)) in request.POST.keys():
-        dbh.addItem(new_list, request.POST['name_' + str(i)], request.POST['cals_' + str(i)], datetime.fromisoformat(request.POST['date_' + str(i)]))
+        ih.addItem(new_list, request.POST['name_' + str(i)], request.POST['cals_' + str(i)], datetime.fromisoformat(request.POST['date_' + str(i)]))
         i+=1
     return renderMyAccount(request, user, "A new list was added")
 
 def consumeItem(request):
-    user = dbh.getUserByName(request.POST['name'])
-    lists = dbh.getListsOfUser(user)
+    user = uh.getUserByName(request.POST['name'])
+    lists = uh.getListsOfUser(user)
     for l in lists:
-        items = dbh.getItemsOfList(l)
+        items = lh.getItemsOfList(l)
         for litem in items:
             if litem.name == request.POST['item_name']:
-                dbh.deleteDBObject(litem)
+                ih.delete(litem)
                 try:
-                    dbh.getItemsOfList(l)[0]
+                    lh.getItemsOfList(l)[0]
                 except IndexError:
-                    dbh.deleteDBObject(l)
+                    lh.delete(l)
                 return renderMyAccount(request, user, "Item consumed")
     return renderMyAccount(request, user, "Item not found")
 
@@ -159,18 +166,18 @@ def register(request):
     cals = request.POST['cals']
     email = request.POST['email']
     context = {'message':""}
-    if dbh.userFound(name):
+    if uh.userFound(name):
         return renderIndex(request, "Username already in use.")
     elif not match(pw1, pw2):
         return renderIndex(request, "Passwords don't match.")
     elif not passwordTemplate(pw1):
         return renderIndex(request, "Password does not meet the requirements.")
     else:
-        dbh.addUser(name, pw1, cals)
+        uh.addUser(name, pw1, cals)
         return renderMyAccount(request, new_user, "Welcome " + name + "!")
 
 def getReport(request):
-    user = dbh.getUserByName(request.POST['name'])
+    user = uh.getUserByName(request.POST['name'])
     return renderMyAccount(request, user, factoryReport.getReport(request.POST['action'], user))
 
 
